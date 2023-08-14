@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/components/app_colorpicker_form_field.dart';
 import '../components/app_text_form_field.dart';
 
 class SetupForm extends StatefulWidget {
@@ -14,9 +15,11 @@ class SetupFormState extends State<SetupForm> {
   final _formKey = GlobalKey<FormState>();
   final distanceController = TextEditingController();
   final durationController = TextEditingController();
+  final colorController = TextEditingController();
 
   double? distance = 0;
   double? duration = 0;
+  Color defaultColor = const Color.fromARGB(255, 198, 88, 252);
 
   @override
   void initState() {
@@ -28,6 +31,10 @@ class SetupFormState extends State<SetupForm> {
     );
     durationController.addListener(() => setState(() {
         duration = double.tryParse(durationController.text) != null ? double.parse(durationController.text) : 0.0 ;
+      }) 
+    );
+    colorController.addListener(() => setState(() {
+        print('test ${colorController.text}');
       }) 
     );
   }
@@ -43,7 +50,7 @@ class SetupFormState extends State<SetupForm> {
             description: 'Distance (en m)',
             controller: distanceController,
             validationMessage: 'Entrer une distance valide.',
-            inputType: TextInputType.numberWithOptions(),
+            inputType: TextInputType.number
           ),
           AppTextFormField(
             title: 'Temps',
@@ -51,6 +58,11 @@ class SetupFormState extends State<SetupForm> {
             controller: durationController,
             validationMessage: 'Entrer une durée valide.',
             inputType: TextInputType.number,
+          ),
+          AppColorpickerFormField(
+            controller: colorController,
+            defaultColor: defaultColor,
+            title: 'Couleur de la lumière'
           ),
           Text(
             'Distance parcourue : $distance '
@@ -75,14 +87,8 @@ class SetupFormState extends State<SetupForm> {
   void dispose() {
     distanceController.dispose();
     durationController.dispose();
+    colorController.dispose();
     super.dispose();
-  }
-
-  String? _validateDuration(String? value){
-    if (value == null || value.isEmpty){
-      return 'Entrer une durée valide';
-    }
-    return null;
   }
 
   double getSpeed(double? distance, double? time){
