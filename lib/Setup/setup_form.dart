@@ -15,11 +15,11 @@ class SetupFormState extends State<SetupForm> {
   final _formKey = GlobalKey<FormState>();
   final distanceController = TextEditingController();
   final durationController = TextEditingController();
-  final colorController = TextEditingController();
 
   double? distance = 0;
   double? duration = 0;
-  Color defaultColor = const Color.fromARGB(255, 198, 88, 252);
+  Color pickerColor = const Color.fromARGB(255, 198, 88, 252);
+  bool hasData = false;
 
   @override
   void initState() {
@@ -31,10 +31,6 @@ class SetupFormState extends State<SetupForm> {
     );
     durationController.addListener(() => setState(() {
         duration = double.tryParse(durationController.text) != null ? double.parse(durationController.text) : 0.0 ;
-      }) 
-    );
-    colorController.addListener(() => setState(() {
-        print('test ${colorController.text}');
       }) 
     );
   }
@@ -60,24 +56,39 @@ class SetupFormState extends State<SetupForm> {
             inputType: TextInputType.number,
           ),
           AppColorpickerFormField(
-            controller: colorController,
-            defaultColor: defaultColor,
-            title: 'Couleur de la lumière'
+            pickerColor: pickerColor,
+            title: 'Couleur de la lumière',
+            onColorChanged: onColorChanged,
           ),
           Text(
             'Distance parcourue : $distance '
             'en $duration secondes. '
-            '(${getSpeed(distance, duration).toStringAsFixed(0)} ms)'
+            '(${getSpeed(distance, duration).toStringAsFixed(0)} ms) '
+            'avec la couleur : $pickerColor'
           ),
-          ElevatedButton(
-            onPressed: () {
-              if (_formKey.currentState!.validate()){
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('OKKKK LEZZZGO'))
-                );
-              }
-            }, 
-            child: const Text('Go!!!'))
+          Row(
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState!.validate()){
+                    hasData = true;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Envoi des données...'))
+                    );
+                  }
+                }, 
+                child: const Text('Send data')
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('GO !'))
+                  );
+                }, 
+                child: const Text('Go !')
+              )
+            ],
+          )
         ],
       ),
     );
@@ -87,15 +98,20 @@ class SetupFormState extends State<SetupForm> {
   void dispose() {
     distanceController.dispose();
     durationController.dispose();
-    colorController.dispose();
     super.dispose();
   }
 
   double getSpeed(double? distance, double? time){
     if (distance != null && distance != 0 && time != null && time != 0){
-      return (distance/time)*1000;
+      return (time/distance)*1000;
     }
     return 0;
+  }
+
+  void onColorChanged(Color color){
+    setState(() {
+      pickerColor = color;
+    });
   }
 }
 
